@@ -10,7 +10,15 @@ from .schemas import Decision, Accuracy, Health, Metadata, Vintages
 
 app = FastAPI(title="Wind forecast historical analysis", version="1.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=[x.strip() for x in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if x.strip()], allow_methods=["GET"], allow_headers=["*"])
-DATA_DIR = Path(os.getenv("DATA_DIR", str(Path(__file__).resolve().parents[2] / "data")))
+# A service bundle contains backend/data; a checkout keeps the source snapshot at root/data.
+# Resolve from this module, never from the process working directory. Docker sets DATA_DIR=/data.
+def default_data_dir():
+    backend_root = Path(__file__).resolve().parents[1]
+    source = backend_root.parent / "data"
+    bundled = backend_root / "data"
+    return source if (source / "manifest.json").is_file() else bundled
+
+DATA_DIR = Path(os.getenv("DATA_DIR", str(default_data_dir())))
 
 @lru_cache(maxsize=1)
 def load_snapshot():

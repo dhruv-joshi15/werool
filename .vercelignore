@@ -9,3 +9,5 @@ frontend/dist
 frontend/.env*
 data/raw
 docs/screenshots
+
+**/.venv

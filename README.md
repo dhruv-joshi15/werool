@@ -149,7 +149,7 @@ API smoke checks, from the repository root:
 python3 backend/scripts/verify_api.py --base-url http://localhost:8001
 ```
 
-The offline suite has 15 passing tests. Snapshot audits check all 744 default-cutoff target selections against raw records. Browser checks exercise navigation, metric dialogs, controls, charts, CSV contents, outcome isolation, error recovery and mobile layout. See [backend verification](docs/implementation-status.md) and [frontend verification](docs/frontend-status.md) for the checks actually performed and remaining limits.
+The offline suite has 18 passing tests, including deployment snapshot packaging and isolated-path checks. Snapshot audits check all 744 default-cutoff target selections against raw records. Browser checks exercise navigation, metric dialogs, controls, charts, CSV contents, outcome isolation, error recovery and mobile layout. See [backend verification](docs/implementation-status.md) and [frontend verification](docs/frontend-status.md) for the checks actually performed and remaining limits.
 
 ## API
 
@@ -172,7 +172,6 @@ Timestamps serialize as UTC ISO strings; unit suffixes distinguish MW and hours.
 ## Project structure
 
 ```text
-api/index.py               Vercel ASGI entry point
 backend/app/               Pure analysis, typed schemas and FastAPI endpoints
 backend/scripts/           Explicit ingestion and offline source audits
 backend/tests/             Deterministic synthetic tests
@@ -183,18 +182,40 @@ data/processed/            Content-addressed runtime snapshot
 data/manifest.json         Retrieval provenance and snapshot identity
 docs/                      Methodology, validation, API contract and screenshots
 compose.yaml               Backend and optional dashboard services
-vercel.json                Static frontend and Python function configuration
+vercel.json                Two-service frontend/API routing and build configuration
 ```
 
 ## Vercel deployment
 
-The repository includes a configuration for the static Vite frontend and a Python ASGI function exposing the existing API. Import **this repository**, keeping the **Root Directory at the repository root**, not `frontend`. Choose **Other** as the framework if prompted; the committed `vercel.json` supplies install/build commands and `frontend/dist` output. Use Node.js 22; `.python-version` selects Python 3.12.
+Deploy this repository as a **Services** project, with **Root Directory `.`** and **Application Preset / Framework `Services`**. Do not select the root Python application, FastAPI or Vite as the project-wide preset, and do not set the project root to either subdirectory. Service-specific presets and commands are declared in `vercel.json`.
 
-For the same-project setup, leave `VITE_API_BASE_URL` unset. API requests use the same origin. Leave `DATA_DIR` unset so the function reads the bundled manifest and normalized snapshot. Raw data, frontend source and verification artifacts are excluded from the Python function bundle. Startup does not ingest data or write persistent files.
+The configuration defines exactly two services:
 
-The configuration and ASGI entry point are prepared; **a hosted Vercel deployment has not been verified**. After deployment, check `/api/v1/health` reports `dataset_ready: true`, open `/docs`, and run the browser/API checks against the resulting URL. No live URL is claimed here.
+| Service | Root | Preset | Public paths |
+| --- | --- | --- | --- |
+| `backend` | `backend` | FastAPI | `/api`, `/api/*`, `/docs`, `/docs/*`, `/openapi.json` |
+| `frontend` | `frontend` | Vite | `/` and all remaining website paths |
 
-For a separately hosted backend, deploy only `frontend/` as a Vite project, set `VITE_API_BASE_URL` to the API origin before building, and configure backend `CORS_ORIGINS` for that frontend origin. Docker also supports running both services on a container host.
+Clear old project-wide install/build/output overrides from the previous single-function setup. Use Node.js 22; `backend/.python-version` selects Python 3.12. Leave `VITE_API_BASE_URL` and `DATA_DIR` unset for this configuration. React uses same-origin `/api/v1/...` requests. The public service rewrite preserves that entire path; no prefix stripping or `root_path` adjustment is needed.
+
+No service binding is required: React runs in the browser and calls the public API; neither service makes a server-side call to the other. Runtime-only binding URLs cannot be injected into a static frontend build. See [deployment notes](docs/deployment.md) for the routing and packaging details.
+
+Before packaging, the backend's build command stages the checksummed manifest and normalized snapshot into ignored `backend/data/`, which is explicitly included in its function bundle. No raw-source records or network ingestion are required at startup. Local Python continues to prefer the repository's source snapshot; Docker continues to use `/data`.
+
+Verify all services locally with a current CLI (65.2.0 was tested):
+
+```sh
+npx vercel@65.2.0 dev --local --listen 127.0.0.1:3011
+```
+
+In another terminal:
+
+```sh
+python3 backend/scripts/verify_service_routes.py --base-url http://127.0.0.1:3011
+python3 backend/scripts/verify_api.py --base-url http://127.0.0.1:3011
+```
+
+A cloud deployment has not been performed by this change. After importing, verify `/api/v1/health` reports `dataset_ready: true`, open `/docs`, and run browser/API checks against the deployment URL.
 
 ## AI assistance
 

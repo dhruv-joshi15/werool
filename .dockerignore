@@ -11,3 +11,7 @@ frontend/dist
 frontend/.env*
 
 **/*.tsbuildinfo
+
+backend/data
+
+**/.venv
