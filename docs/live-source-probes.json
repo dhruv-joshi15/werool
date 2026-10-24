@@ -1,0 +1,43 @@
+[
+  {
+    "dataset": "WINDFOR",
+    "url": "https://data.elexon.co.uk/bmrs/api/v1/datasets/WINDFOR/stream?publishDateTimeFrom=2026-01-15T00%3A00%3A00Z&publishDateTimeTo=2026-01-15T12%3A00%3A00Z",
+    "status": 200,
+    "total_rows": 292,
+    "wind_rows": 292,
+    "publications": 4,
+    "first_target": "2026-01-14T21:00:00Z",
+    "last_target": "2026-01-17T21:00:00Z",
+    "target_spacing_minutes": [
+      60
+    ],
+    "fields": [
+      "dataset",
+      "publishTime",
+      "startTime",
+      "generation"
+    ]
+  },
+  {
+    "dataset": "FUELHH",
+    "url": "https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELHH/stream?publishDateTimeFrom=2026-02-01T00%3A00%3A00Z&publishDateTimeTo=2026-02-02T00%3A00%3A00Z",
+    "status": 200,
+    "total_rows": 980,
+    "wind_rows": 49,
+    "publications": 49,
+    "first_target": "2026-01-31T23:30:00Z",
+    "last_target": "2026-02-01T23:30:00Z",
+    "target_spacing_minutes": [
+      30
+    ],
+    "fields": [
+      "dataset",
+      "publishTime",
+      "startTime",
+      "settlementDate",
+      "settlementPeriod",
+      "fuelType",
+      "generation"
+    ]
+  }
+]

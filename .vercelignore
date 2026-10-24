@@ -1,0 +1,11 @@
+.git
+.venv
+frontend/node_modules
+frontend/dist
+**/__pycache__
+**/.pytest_cache
+**/*.tsbuildinfo
+.env
+frontend/.env*
+data/raw
+docs/screenshots

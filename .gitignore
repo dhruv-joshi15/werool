@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+.DS_Store
+data/manifest.pending.json
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# React build and local configuration
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+frontend/.env*
+!frontend/.env.example
+
+# Local hosting metadata and secrets
+.vercel/
+.env.*
+!.env.example
+*.log
